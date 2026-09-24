@@ -3,48 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>BeSpoke AI Stylist</title>
+  <title>BeSpoke Personal AI Wardrobe</title>
 
-  <!-- PWA & Mobile Installability -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="manifest" id="pwa-manifest">
-
-  <!-- Tailwind CSS & Lucide Icons -->
+  <!-- External UI Frameworks & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script>
-    const manifest = {
-      "name": "BeSpoke AI Stylist",
-      "short_name": "BeSpoke",
-      "start_url": "./",
-      "display": "standalone",
-      "background_color": "#ffffff",
-      "theme_color": "#ffffff",
-      "icons": [{ "src": "https://img.icons8.com/isometric-line/512/clothes.png", "sizes": "512x512", "type": "image/png" }]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-    document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(blob));
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
+
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-      background-color: #121212;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #09090b;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       overflow: hidden;
     }
-    
+
     .app-viewport {
       width: 100%;
       max-width: 430px;
@@ -56,6 +37,7 @@
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
     .screen-content {
@@ -71,15 +53,45 @@
     .subtab-btn {
       padding-bottom: 8px;
       font-size: 12px;
-      color: #9ca3af;
-      font-weight: 500;
+      color: #a1a1aa;
+      font-weight: 600;
       border-bottom: 2px solid transparent;
       transition: all 0.2s ease;
     }
+
     .subtab-btn.active {
-      color: #000000;
-      font-weight: 700;
-      border-bottom-color: #000000;
+      color: #09090b;
+      font-weight: 800;
+      border-bottom-color: #09090b;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .garment-card {
+      background: #fdfdfd;
+      border: 1px solid #e4e4e7;
+      border-radius: 1rem;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .garment-card:active {
+      transform: scale(0.98);
     }
   </style>
 </head>
@@ -87,276 +99,384 @@
 
 <div class="app-viewport">
 
-  <!-- APP HEADER -->
+  <!-- TOP APP BAR -->
   <header class="px-5 pt-4 pb-3 border-b border-zinc-100 flex justify-between items-center bg-white z-20 shrink-0">
-    <h1 id="screen-title" class="text-xl font-bold tracking-tight text-black">Closet</h1>
-    <div class="flex items-center gap-3">
-      <button onclick="toggleSearch()" class="p-1.5 rounded-full hover:bg-zinc-100 active:scale-95 transition-transform"><i data-lucide="search" class="w-5 h-5 text-zinc-700"></i></button>
-      <button onclick="alert('Filter options opening...')" class="p-1.5 rounded-full hover:bg-zinc-100 active:scale-95 transition-transform"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-700"></i></button>
-      <div onclick="alert('User profile menu')" class="w-8 h-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-600 cursor-pointer active:scale-95 transition-transform">
-        <i data-lucide="user" class="w-4 h-4"></i>
-      </div>
+    <div>
+      <h1 class="text-xl font-extrabold tracking-tight text-zinc-900">BeSpoke</h1>
+      <p class="text-[10px] text-zinc-400 font-medium -mt-1">Personal Digital Wardrobe</p>
     </div>
+    <button onclick="triggerFileUpload()" class="px-3.5 py-2 bg-zinc-900 hover:bg-black text-white rounded-full text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform">
+      <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Clothes
+    </button>
   </header>
 
-  <!-- SEARCH BAR OVERLAY -->
-  <div id="search-bar" class="hidden px-4 py-2 border-b border-zinc-100 bg-zinc-50 flex items-center gap-2">
-    <i data-lucide="search" class="w-4 h-4 text-zinc-400"></i>
-    <input type="text" placeholder="Search clothes, outfits, styles..." class="w-full bg-transparent text-xs focus:outline-none">
-    <button onclick="toggleSearch()" class="text-xs text-zinc-400 hover:text-black">Cancel</button>
-  </div>
+  <!-- HIDDEN INPUT FOR CAMERA & GALLERY ACCESS -->
+  <input type="file" id="clothes-file-input" accept="image/*" class="hidden" onchange="processUploadedGarment(event)">
 
-  <!-- SCREEN 1: CLOSET -->
-  <div id="view-closet" class="screen-content px-4 pt-3">
+  <!-- SCREEN 1: DIGITAL WARDROBE -->
+  <div id="screen-wardrobe" class="screen-content px-4 pt-3 hide-scrollbar">
+    
+    <!-- CATEGORY FILTER BAR -->
     <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button onclick="switchSubTab('closet', 'items')" id="c-sub-items" class="subtab-btn active">Items</button>
-      <button onclick="switchSubTab('closet', 'canvas')" id="c-sub-canvas" class="subtab-btn">Canvas</button>
-      <button onclick="switchSubTab('closet', 'collections')" id="c-sub-collections" class="subtab-btn">Collections</button>
+      <button onclick="filterCategory('all')" id="tab-all" class="subtab-btn active">All (<span id="cnt-all">0</span>)</button>
+      <button onclick="filterCategory('tops')" id="tab-tops" class="subtab-btn">Tops (<span id="cnt-tops">0</span>)</button>
+      <button onclick="filterCategory('bottoms')" id="tab-bottoms" class="subtab-btn">Bottoms (<span id="cnt-bottoms">0</span>)</button>
+      <button onclick="filterCategory('shoes')" id="tab-shoes" class="subtab-btn">Shoes (<span id="cnt-shoes">0</span>)</button>
     </div>
 
-    <!-- Items Subtab -->
-    <div id="closet-sec-items" class="space-y-4">
-      <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
-        <button onclick="filterCategory(this, 'all')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black text-white whitespace-nowrap">All</button>
-        <button onclick="filterCategory(this, 'sweatshirts')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Sweatshirts & Hoodies</button>
-        <button onclick="filterCategory(this, 'jeans')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Jeans</button>
-        <button onclick="filterCategory(this, 'blazers')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Blazers & Suits</button>
+    <!-- EMPTY STATE -->
+    <div id="wardrobe-empty-state" class="text-center py-20 px-4">
+      <div class="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center mx-auto text-zinc-400 mb-4 shadow-inner">
+        <i data-lucide="shirt" class="w-10 h-10"></i>
       </div>
-
-      <div class="grid grid-cols-2 gap-3" id="closet-grid">
-        <div class="item-card sweatshirts bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
-          <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300" class="h-28 object-contain mix-blend-multiply">
-        </div>
-        <div class="item-card jeans bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
-          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=300" class="h-28 object-contain mix-blend-multiply">
-        </div>
-        <div class="item-card blazers bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
-          <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300" class="h-28 object-contain mix-blend-multiply">
-        </div>
-        <div class="item-card jeans bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
-          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="h-28 object-contain mix-blend-multiply">
-        </div>
-      </div>
+      <h3 class="text-sm font-bold text-zinc-900">Your Wardrobe is Empty</h3>
+      <p class="text-xs text-zinc-400 max-w-xs mx-auto mt-1.5 leading-relaxed">
+        Upload photos of your garments. The integrated processor will trim the snapshot background automatically.
+      </p>
+      <button onclick="triggerFileUpload()" class="mt-5 px-4 py-2.5 bg-zinc-100 text-zinc-800 rounded-xl text-xs font-bold hover:bg-zinc-200 active:scale-95 transition-all">
+        Upload Your First Garment
+      </button>
     </div>
 
-    <!-- Canvas Subtab -->
-    <div id="closet-sec-canvas" class="hidden space-y-4">
-      <div class="bg-zinc-50 border border-dashed border-zinc-300 rounded-3xl h-80 relative flex flex-col items-center justify-center p-4">
-        <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300" class="w-24 h-24 object-contain absolute top-6 left-10 mix-blend-multiply">
-        <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300" class="w-24 h-32 object-contain absolute top-16 right-8 mix-blend-multiply">
-        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="w-20 h-20 object-contain absolute bottom-12 left-10 mix-blend-multiply">
-        
-        <div class="absolute bottom-4">
-          <button onclick="alert('Canvas outfit saved!')" class="bg-black text-white px-8 py-2.5 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform">Save Outfit</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Collections Subtab -->
-    <div id="closet-sec-collections" class="hidden space-y-3">
-      <div class="p-4 border border-zinc-200 rounded-2xl bg-zinc-50 flex justify-between items-center">
-        <div>
-          <p class="text-xs font-bold text-black">Summer Essentials</p>
-          <p class="text-[10px] text-zinc-400">12 items</p>
-        </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-400"></i>
-      </div>
-      <div class="p-4 border border-zinc-200 rounded-2xl bg-zinc-50 flex justify-between items-center">
-        <div>
-          <p class="text-xs font-bold text-black">Formal Workwear</p>
-          <p class="text-[10px] text-zinc-400">8 items</p>
-        </div>
-        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-400"></i>
-      </div>
-    </div>
+    <!-- DYNAMIC WARDROBE GRID -->
+    <div id="wardrobe-items-grid" class="grid grid-cols-2 gap-3.5 hidden"></div>
   </div>
 
-  <!-- SCREEN 2: PLANNER -->
-  <div id="view-planner" class="screen-content px-4 pt-3 hidden">
-    <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button onclick="switchSubTab('planner', 'calendar')" id="p-sub-calendar" class="subtab-btn">Calendar</button>
-      <button onclick="switchSubTab('planner', 'events')" id="p-sub-events" class="subtab-btn">Events</button>
-      <button onclick="switchSubTab('planner', 'ootds')" id="p-sub-ootds" class="subtab-btn active">OOTDs</button>
+  <!-- SCREEN 2: PINTEREST OUTFIT LOOKBOOK BUILDER -->
+  <div id="screen-pinterest" class="screen-content px-4 pt-4 hide-scrollbar hidden">
+    <div class="mb-4">
+      <h2 class="text-base font-bold text-zinc-900">Pinterest Outfit Matcher</h2>
+      <p class="text-xs text-zinc-500 mt-0.5">Select garments from your collection to discover curated Pinterest lookbooks.</p>
     </div>
 
-    <div id="planner-sec-calendar" class="hidden text-center py-8 text-xs text-zinc-400">
-      Calendar View Syncing...
+    <div id="pinterest-selection-list" class="space-y-2.5 mb-6">
+      <!-- Selectable items dynamically populate here -->
     </div>
 
-    <div id="planner-sec-events" class="hidden text-center py-8 text-xs text-zinc-400">
-      No upcoming events scheduled.
-    </div>
-
-    <div id="planner-sec-ootds" class="space-y-4">
-      <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 flex justify-between items-center">
-        <div>
-          <p class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Kottiyoor</p>
-          <p class="text-xl font-bold text-black">28°C</p>
-        </div>
-        <div class="text-right">
-          <p class="text-[10px] font-semibold text-zinc-500">Weekly Forecast</p>
-          <p class="text-xs text-zinc-400">Warm & Sunny</p>
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider">My OOTDs</h3>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
-            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-            <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-          </div>
-          <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
-            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-            <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-          </div>
-        </div>
-
-        <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider pt-2">OOTD Recommendation</h3>
-        <div class="bg-black text-white rounded-2xl p-4 space-y-1">
-          <p class="text-xs font-bold text-zinc-100">Smart Casual Blend</p>
-          <p class="text-[11px] text-zinc-400 leading-relaxed">Pair navy trousers with classic white sneakers for an effortless day vibe.</p>
-        </div>
-      </div>
-    </div>
+    <button onclick="searchPinterestCombined()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-bold shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 active:scale-95 transition-all">
+      <i data-lucide="search" class="w-4 h-4"></i> Search Outfit Matches on Pinterest
+    </button>
   </div>
 
-  <!-- SCREEN 3: DISCOVER -->
-  <div id="view-discover" class="screen-content px-4 pt-3 hidden">
-    <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button onclick="switchSubTab('discover', 'feed')" id="d-sub-feed" class="subtab-btn active">Feed</button>
-      <button onclick="switchSubTab('discover', 'explore')" id="d-sub-explore" class="subtab-btn">Explore</button>
-      <button onclick="switchSubTab('discover', 'shop')" id="d-sub-shop" class="subtab-btn">Shop</button>
-    </div>
-
-    <div id="discover-sec-feed" class="space-y-4">
-      <div class="border border-zinc-200 rounded-3xl p-3 bg-white space-y-3">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">J</div>
-          <div>
-            <p class="text-xs font-bold text-black">Jeniffer51</p>
-            <p class="text-[9px] text-zinc-400">2 hours ago</p>
-          </div>
-        </div>
-        <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500" class="w-full h-56 object-cover rounded-2xl">
-        <p class="text-xs text-zinc-600 px-1">Minimalist beige aesthetics for soft light afternoon mood.</p>
-      </div>
-    </div>
-
-    <div id="discover-sec-explore" class="hidden text-center py-8 text-xs text-zinc-400">
-      Trending styles loading...
-    </div>
-
-    <div id="discover-sec-shop" class="hidden text-center py-8 text-xs text-zinc-400">
-      Curated shopping collection offline.
-    </div>
-  </div>
-
-  <!-- SCREEN 4: VIRTUAL TRY-ON (Studio) -->
-  <div id="view-tryon" class="screen-content px-4 pt-3 hidden space-y-4">
-    <div class="flex border-b border-zinc-100 mb-2 justify-around">
-      <button onclick="switchSubTab('tryon', 'tryon')" id="t-sub-tryon" class="subtab-btn active">Try-on</button>
-      <button onclick="switchSubTab('tryon', 'canvas')" id="t-sub-canvas" class="subtab-btn">Canvas</button>
-      <button onclick="switchSubTab('tryon', 'dressing')" id="t-sub-dressing" class="subtab-btn">Dressing</button>
-    </div>
-
-    <div id="tryon-sec-tryon" class="space-y-3">
-      <p class="text-xs font-semibold text-zinc-800">Choose clothing type and upload:</p>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs">
-        <button onclick="selectOption(this)" class="opt-btn py-2 border border-black bg-black text-white rounded-xl font-medium">Tops</button>
-        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">Bottoms</button>
-        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">One-piece</button>
-      </div>
-
-      <div class="flex justify-around py-5 border border-dashed border-zinc-300 rounded-2xl bg-zinc-50/50">
-        <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
-        <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
-        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
-      </div>
-
-      <p class="text-xs font-semibold text-zinc-800 pt-2">Choose body type:</p>
-      <div class="grid grid-cols-2 gap-2 text-center text-xs">
-        <button onclick="selectOption(this)" class="opt-btn py-2 border border-black bg-black text-white rounded-xl font-medium">Self</button>
-        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">Model</button>
-      </div>
-    </div>
-
-    <div id="tryon-sec-canvas" class="hidden text-center py-8 text-xs text-zinc-400">Studio canvas ready.</div>
-    <div id="tryon-sec-dressing" class="hidden text-center py-8 text-xs text-zinc-400">Dressing room ready.</div>
-  </div>
-
-  <!-- SCREEN 5: BESPOKELY AI STYLIST -->
-  <div id="view-ai" class="screen-content px-4 pt-3 hidden space-y-4">
-    <div class="flex border-b border-zinc-100 mb-2 justify-around">
-      <button onclick="switchSubTab('ai', 'stylist')" id="a-sub-stylist" class="subtab-btn active">Stylist</button>
-      <button onclick="switchSubTab('ai', 'designer')" id="a-sub-designer" class="subtab-btn">Designer</button>
-      <button onclick="switchSubTab('ai', 'ratings')" id="a-sub-ratings" class="subtab-btn">Outfit Ratings</button>
-    </div>
-
-    <div id="ai-sec-stylist" class="space-y-3">
-      <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-800 border border-zinc-200/60 space-y-1">
-        <p class="font-bold text-black">BeSpokely AI</p>
-        <p>"What do you pair with the navy blue t-shirt for a casual evening?"</p>
-      </div>
-      <div class="p-3 border border-zinc-200 rounded-2xl bg-white space-y-2">
-        <p class="text-[11px] font-semibold text-zinc-500 uppercase">Suggested Pairings</p>
-        <div class="flex gap-2">
-          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-14 h-14 object-contain mix-blend-multiply bg-zinc-50 rounded-lg border">
-          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-14 h-14 object-contain mix-blend-multiply bg-zinc-50 rounded-lg border">
-        </div>
-      </div>
-    </div>
-
-    <div id="ai-sec-designer" class="hidden space-y-3">
-      <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-800 border border-zinc-200/60">
-        <p class="font-bold text-black">Generate Trend Outfit</p>
-        <p class="text-zinc-500 text-[11px]">Creating tailored blazer suit preview...</p>
-      </div>
-      <div class="rounded-2xl overflow-hidden border border-zinc-200">
-        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400" class="w-full h-44 object-cover">
-      </div>
-    </div>
-
-    <div id="ai-sec-ratings" class="hidden space-y-3">
-      <div class="p-4 border border-zinc-200 rounded-2xl bg-white space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-zinc-800">Overall Score</span>
-          <span class="text-base font-bold text-black">7.8 / 10</span>
-        </div>
-        <div class="w-full bg-zinc-100 rounded-full h-2">
-          <div class="bg-black h-2 rounded-full" style="width: 78%"></div>
-        </div>
-        <div class="space-y-1.5 pt-1 text-[11px]">
-          <div class="flex justify-between"><span class="text-zinc-500">Color Harmony</span><span class="text-emerald-600 font-bold">Great Match</span></div>
-          <div class="flex justify-between"><span class="text-zinc-500">Occasion Fit</span><span class="text-emerald-600 font-bold">Optimal</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOATING ACTION BUTTON -->
-  <button onclick="toggleAddModal()" class="absolute bottom-20 right-5 w-12 h-12 bg-black text-white rounded-full shadow-2xl flex items-center justify-center z-30 active:scale-95 transition-transform">
-    <i data-lucide="plus" class="w-6 h-6"></i>
-  </button>
-
-  <!-- ADD ITEM MODAL -->
-  <div id="add-modal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-end justify-center">
-    <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 animate-in slide-in-from-bottom">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="text-sm font-bold text-black">Add New Item</h3>
-        <button onclick="toggleAddModal()" class="text-xs text-zinc-400">Close</button>
-      </div>
-      <div class="space-y-2">
-        <button onclick="alert('Camera opened')" class="w-full py-3 bg-zinc-100 rounded-xl text-xs font-bold text-zinc-800 flex items-center justify-center gap-2">
-          <i data-lucide="camera" class="w-4 h-4"></i> Take Photo
-        </button>
-        <button onclick="alert('Gallery opened')" class="w-full py-3 bg-zinc-100 rounded-xl text-xs font-bold text-zinc-800 flex items-center justify-center gap-2">
-          <i data-lucide="image" class="w-4 h-4"></i> Choose from Gallery
-        </button>
-      </div>
-    </div>
+  <!-- PROCESSING MODAL OVERLAY -->
+  <div id="processing-modal" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-white text-center">
+    <div class="spinner mb-4"></div>
+    <h3 class="text-base font-bold tracking-tight">Isolating Garment & Removing Background</h3>
+    <p class="text-xs text-zinc-400 mt-1 max-w-xs">Converting your photo into a transparent digital wardrobe asset...</p>
   </div>
 
   <!-- BOTTOM NAVIGATION -->
-  <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-zinc-200 py-3 px-4 flex justify-around items-center z-30">
-    <button onclick="switchTab('closet', 'Closet')" id="nav-closet" c
+  <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-zinc-200/80 py-2.5 px-6 flex justify-around items-center z-30">
+    <button onclick="switchTab('wardrobe')" id="nav-btn-wardrobe" class="flex flex-col items-center text-zinc-900 transition-colors">
+      <i data-lucide="shirt" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold mt-1">Wardrobe</span>
+    </button>
+    <button onclick="switchTab('pinterest')" id="nav-btn-pinterest" class="flex flex-col items-center text-zinc-400 transition-colors">
+      <i data-lucide="compass" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold mt-1">Pinterest Ideas</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- APPLICATION JAVASCRIPT ENGINE -->
+<script>
+  // CENTRALIZED STATE MANAGEMENT
+  const AppState = {
+    wardrobe: [],
+    activeCategory: 'all',
+    activeTab: 'wardrobe',
+    selectedForPinterest: new Set()
+  };
+
+  // INITIALIZATION ON LOAD
+  document.addEventListener('DOMContentLoaded', () => {
+    loadWardrobeFromStorage();
+    renderApp();
+    lucide.createIcons();
+  });
+
+  function triggerFileUpload() {
+    document.getElementById('clothes-file-input').click();
+  }
+
+  // LOCAL STORAGE CONTROLLER
+  function loadWardrobeFromStorage() {
+    try {
+      const saved = localStorage.getItem('bespoke_wardrobe_data');
+      if (saved) {
+        AppState.wardrobe = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("Failed to load wardrobe data", e);
+      AppState.wardrobe = [];
+    }
+  }
+
+  function saveWardrobeToStorage() {
+    try {
+      localStorage.setItem('bespoke_wardrobe_data', JSON.stringify(AppState.wardrobe));
+    } catch (e) {
+      console.error("Failed to save wardrobe data", e);
+    }
+  }
+
+  // CANVAS-BASED BACKGROUND ISOLATION ALGORITHM
+  function processUploadedGarment(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const modal = document.getElementById('processing-modal');
+    modal.classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Scale canvas down slightly for fast processing and optimal mobile memory usage
+        const maxDim = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Background Trim Algorithm
+        const imgData = ctx.getImageData(0, 0, width, height);
+        const data = imgData.data;
+
+        // Sample corner pixel color (assumed background tone)
+        const bgR = data[0];
+        const bgG = data[1];
+        const bgB = data[2];
+        const tolerance = 35;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // Check color difference from background sample
+          if (
+            Math.abs(r - bgR) < tolerance &&
+            Math.abs(g - bgG) < tolerance &&
+            Math.abs(b - bgB) < tolerance
+          ) {
+            data[i + 3] = 0; // Make background pixel fully transparent
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        const processedImageUrl = canvas.toDataURL('image/png');
+
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          
+          const defaultName = file.name.split('.')[0].replace(/[-_]/g, ' ') || "Garment Item";
+          const itemName = prompt("Enter garment name:", defaultName) || "Garment Item";
+          const categoryChoice = prompt("Choose category (tops, bottoms, shoes):", "tops") || "tops";
+          
+          const cleanCategory = categoryChoice.toLowerCase().trim();
+          const validCategory = ['tops', 'bottoms', 'shoes'].includes(cleanCategory) ? cleanCategory : 'tops';
+
+          const newGarment = {
+            id: Date.now(),
+            name: itemName,
+            category: validCategory,
+            image: processedImageUrl,
+            dateAdded: new Date().toISOString()
+          };
+
+          AppState.wardrobe.unshift(newGarment);
+          saveWardrobeToStorage();
+          renderApp();
+          
+          // Reset file input
+          event.target.value = '';
+        }, 1000);
+      };
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // WARDROBE DELETION
+  function deleteGarment(id, event) {
+    event.stopPropagation();
+    if (confirm("Remove this item from your wardrobe?")) {
+      AppState.wardrobe = AppState.wardrobe.filter(item => item.id !== id);
+      AppState.selectedForPinterest.delete(id);
+      saveWardrobeToStorage();
+      renderApp();
+    }
+  }
+
+  // CATEGORY FILTERING
+  function filterCategory(cat) {
+    AppState.activeCategory = cat;
+    document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${cat}`).classList.add('active');
+    renderWardrobeGrid();
+  }
+
+  // TAB SWITCHING
+  function switchTab(tab) {
+    AppState.activeTab = tab;
+    const isWardrobe = tab === 'wardrobe';
+
+    document.getElementById('screen-wardrobe').classList.toggle('hidden', !isWardrobe);
+    document.getElementById('screen-pinterest').classList.toggle('hidden', isWardrobe);
+
+    document.getElementById('nav-btn-wardrobe').className = isWardrobe 
+      ? 'flex flex-col items-center text-zinc-900 transition-colors' 
+      : 'flex flex-col items-center text-zinc-400 transition-colors';
+
+    document.getElementById('nav-btn-pinterest').className = !isWardrobe 
+      ? 'flex flex-col items-center text-zinc-900 transition-colors' 
+      : 'flex flex-col items-center text-zinc-400 transition-colors';
+
+    if (!isWardrobe) {
+      renderPinterestTab();
+    }
+  }
+
+  // RENDER CONTROLLERS
+  function renderApp() {
+    updateCounts();
+    renderWardrobeGrid();
+    if (AppState.activeTab === 'pinterest') {
+      renderPinterestTab();
+    }
+    lucide.createIcons();
+  }
+
+  function updateCounts() {
+    const total = AppState.wardrobe.length;
+    const tops = AppState.wardrobe.filter(i => i.category === 'tops').length;
+    const bottoms = AppState.wardrobe.filter(i => i.category === 'bottoms').length;
+    const shoes = AppState.wardrobe.filter(i => i.category === 'shoes').length;
+
+    document.getElementById('cnt-all').textContent = total;
+    document.getElementById('cnt-tops').textContent = tops;
+    document.getElementById('cnt-bottoms').textContent = bottoms;
+    document.getElementById('cnt-shoes').textContent = shoes;
+  }
+
+  function renderWardrobeGrid() {
+    const grid = document.getElementById('wardrobe-items-grid');
+    const emptyState = document.getElementById('wardrobe-empty-state');
+
+    const filtered = AppState.activeCategory === 'all' 
+      ? AppState.wardrobe 
+      : AppState.wardrobe.filter(item => item.category === AppState.activeCategory);
+
+    if (AppState.wardrobe.length === 0) {
+      emptyState.classList.remove('hidden');
+      grid.classList.add('hidden');
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    grid.classList.remove('hidden');
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="col-span-2 text-center py-12 text-zinc-400 text-xs font-semibold">No items found in this category.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(item => `
+      <div class="garment-card group">
+        <button onclick="deleteGarment(${item.id}, event)" class="absolute top-2 right-2 text-zinc-300 hover:text-red-500 text-xs p-1 font-bold z-10 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <div class="w-full h-32 flex items-center justify-center overflow-hidden my-1">
+          <img src="${item.image}" class="h-28 object-contain drop-shadow-md transition-transform group-hover:scale-105">
+        </div>
+        <p class="text-[11px] font-bold text-zinc-800 truncate w-full text-center mt-1">${item.name}</p>
+        <span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 mt-0.5">${item.category}</span>
+        
+        <button onclick="searchPinterestSingle('${item.name}')" class="mt-2.5 w-full py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all">
+          <i data-lucide="search" class="w-3 h-3"></i> Match Ideas
+        </button>
+      </div>
+    `).join('');
+
+    lucide.createIcons();
+  }
+
+  function renderPinterestTab() {
+    const list = document.getElementById('pinterest-selection-list');
+
+    if (AppState.wardrobe.length === 0) {
+      list.innerHTML = `
+        <div class="text-center py-12 text-zinc-400 text-xs font-medium">
+          Upload items to your wardrobe first to start generating outfit matches.
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = AppState.wardrobe.map(item => {
+      const isChecked = AppState.selectedForPinterest.has(item.id) ? 'checked' : '';
+      return `
+        <label class="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-200/80 rounded-2xl cursor-pointer hover:bg-zinc-100/80 transition-colors">
+          <div class="flex items-center gap-3">
+            <img src="${item.image}" class="w-10 h-10 object-contain drop-shadow-sm">
+            <div>
+              <p class="text-xs font-bold text-zinc-800">${item.name}</p>
+              <span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400">${item.category}</span>
+            </div>
+          </div>
+          <input type="checkbox" onchange="togglePinterestSelection(${item.id})" ${isChecked} class="w-4 h-4 text-zinc-900 rounded border-zinc-300 focus:ring-0">
+        </label>
+      `;
+    }).join('');
+
+    lucide.createIcons();
+  }
+
+  function togglePinterestSelection(id) {
+    if (AppState.selectedForPinterest.has(id)) {
+      AppState.selectedForPinterest.delete(id);
+    } else {
+      AppState.selectedForPinterest.add(id);
+    }
+  }
+
+  // PINTEREST SEARCH ENGINE INTEGRATION
+  function searchPinterestSingle(itemName) {
+    const query = encodeURIComponent(`${itemName} outfit style lookbook aesthetic`);
+    window.open(`https://www.pinterest.com/search/pins/?q=${query}`, '_blank');
+  }
+
+  function searchPinterestCombined() {
+    if (AppState.selectedForPinterest.size === 0) {
+      alert("Please select at least one garment from your list.");
+      return;
+    }
+
+    const selectedNames = AppState.wardrobe
+      .filter(item => AppState.selectedForPinterest.has(item.id))
+      .map(item => item.name);
+
+    const queryStr = selectedNames.join(' ') + " outfit combination style lookbook aesthetic";
+    const query = encodeURIComponent(queryStr);
+    window.open(`https://www.pinterest.com/search/pins/?q=${query}`, '_blank');
+  }
+</script>
+
+</body>
+</html>
