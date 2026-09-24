@@ -45,7 +45,6 @@
       overflow: hidden;
     }
     
-    /* App Shell Container */
     .app-viewport {
       width: 100%;
       max-width: 430px;
@@ -59,7 +58,6 @@
       overflow: hidden;
     }
 
-    /* Scrollable Area per Screen */
     .screen-content {
       flex: 1;
       overflow-y: auto;
@@ -70,7 +68,6 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Subtab Styles */
     .subtab-btn {
       padding-bottom: 8px;
       font-size: 12px;
@@ -90,106 +87,136 @@
 
 <div class="app-viewport">
 
-  <!-- APP HEADER (Fixed Top) -->
+  <!-- APP HEADER -->
   <header class="px-5 pt-4 pb-3 border-b border-zinc-100 flex justify-between items-center bg-white z-20 shrink-0">
     <h1 id="screen-title" class="text-xl font-bold tracking-tight text-black">Closet</h1>
     <div class="flex items-center gap-3">
-      <button class="p-1.5 rounded-full hover:bg-zinc-100"><i data-lucide="search" class="w-5 h-5 text-zinc-700"></i></button>
-      <button class="p-1.5 rounded-full hover:bg-zinc-100"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-700"></i></button>
-      <div class="w-8 h-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-600">
+      <button onclick="toggleSearch()" class="p-1.5 rounded-full hover:bg-zinc-100 active:scale-95 transition-transform"><i data-lucide="search" class="w-5 h-5 text-zinc-700"></i></button>
+      <button onclick="alert('Filter options opening...')" class="p-1.5 rounded-full hover:bg-zinc-100 active:scale-95 transition-transform"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-700"></i></button>
+      <div onclick="alert('User profile menu')" class="w-8 h-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-600 cursor-pointer active:scale-95 transition-transform">
         <i data-lucide="user" class="w-4 h-4"></i>
       </div>
     </div>
   </header>
 
+  <!-- SEARCH BAR OVERLAY -->
+  <div id="search-bar" class="hidden px-4 py-2 border-b border-zinc-100 bg-zinc-50 flex items-center gap-2">
+    <i data-lucide="search" class="w-4 h-4 text-zinc-400"></i>
+    <input type="text" placeholder="Search clothes, outfits, styles..." class="w-full bg-transparent text-xs focus:outline-none">
+    <button onclick="toggleSearch()" class="text-xs text-zinc-400 hover:text-black">Cancel</button>
+  </div>
+
   <!-- SCREEN 1: CLOSET -->
   <div id="view-closet" class="screen-content px-4 pt-3">
-    <!-- Subtabs -->
     <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button onclick="switchClosetSub('items')" id="c-sub-items" class="subtab-btn active">Items</button>
-      <button onclick="switchClosetSub('canvas')" id="c-sub-canvas" class="subtab-btn">Canvas</button>
-      <button onclick="switchClosetSub('collections')" id="c-sub-collections" class="subtab-btn">Collections</button>
+      <button onclick="switchSubTab('closet', 'items')" id="c-sub-items" class="subtab-btn active">Items</button>
+      <button onclick="switchSubTab('closet', 'canvas')" id="c-sub-canvas" class="subtab-btn">Canvas</button>
+      <button onclick="switchSubTab('closet', 'collections')" id="c-sub-collections" class="subtab-btn">Collections</button>
     </div>
 
-    <!-- Subtab: Items -->
-    <div id="c-items-content" class="space-y-4">
+    <!-- Items Subtab -->
+    <div id="closet-sec-items" class="space-y-4">
       <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
-        <button class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black text-white whitespace-nowrap">Sweatshirts & Hoodies</button>
-        <button class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Jeans</button>
-        <button class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Blazers & Suits</button>
+        <button onclick="filterCategory(this, 'all')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-black text-white whitespace-nowrap">All</button>
+        <button onclick="filterCategory(this, 'sweatshirts')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Sweatshirts & Hoodies</button>
+        <button onclick="filterCategory(this, 'jeans')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Jeans</button>
+        <button onclick="filterCategory(this, 'blazers')" class="cat-chip px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Blazers & Suits</button>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36">
+      <div class="grid grid-cols-2 gap-3" id="closet-grid">
+        <div class="item-card sweatshirts bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
           <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300" class="h-28 object-contain mix-blend-multiply">
         </div>
-        <div class="bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36">
-          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="h-28 object-contain mix-blend-multiply">
+        <div class="item-card jeans bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
+          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=300" class="h-28 object-contain mix-blend-multiply">
         </div>
-        <div class="bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36">
+        <div class="item-card blazers bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
           <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300" class="h-28 object-contain mix-blend-multiply">
         </div>
-        <div class="bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36">
-          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=300" class="h-28 object-contain mix-blend-multiply">
+        <div class="item-card jeans bg-zinc-50 border border-zinc-200/70 rounded-2xl p-4 flex items-center justify-center h-36 relative group">
+          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="h-28 object-contain mix-blend-multiply">
         </div>
       </div>
     </div>
 
-    <!-- Subtab: Canvas -->
-    <div id="c-canvas-content" class="hidden space-y-4">
+    <!-- Canvas Subtab -->
+    <div id="closet-sec-canvas" class="hidden space-y-4">
       <div class="bg-zinc-50 border border-dashed border-zinc-300 rounded-3xl h-80 relative flex flex-col items-center justify-center p-4">
         <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300" class="w-24 h-24 object-contain absolute top-6 left-10 mix-blend-multiply">
         <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300" class="w-24 h-32 object-contain absolute top-16 right-8 mix-blend-multiply">
         <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="w-20 h-20 object-contain absolute bottom-12 left-10 mix-blend-multiply">
         
         <div class="absolute bottom-4">
-          <button class="bg-black text-white px-8 py-2.5 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform">Create</button>
+          <button onclick="alert('Canvas outfit saved!')" class="bg-black text-white px-8 py-2.5 rounded-full font-semibold text-xs shadow-md active:scale-95 transition-transform">Save Outfit</button>
         </div>
       </div>
     </div>
 
-    <!-- Subtab: Collections -->
-    <div id="c-collections-content" class="hidden text-center py-10 text-xs text-zinc-400">
-      No saved collections yet.
+    <!-- Collections Subtab -->
+    <div id="closet-sec-collections" class="hidden space-y-3">
+      <div class="p-4 border border-zinc-200 rounded-2xl bg-zinc-50 flex justify-between items-center">
+        <div>
+          <p class="text-xs font-bold text-black">Summer Essentials</p>
+          <p class="text-[10px] text-zinc-400">12 items</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-400"></i>
+      </div>
+      <div class="p-4 border border-zinc-200 rounded-2xl bg-zinc-50 flex justify-between items-center">
+        <div>
+          <p class="text-xs font-bold text-black">Formal Workwear</p>
+          <p class="text-[10px] text-zinc-400">8 items</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-400"></i>
+      </div>
     </div>
   </div>
 
   <!-- SCREEN 2: PLANNER -->
   <div id="view-planner" class="screen-content px-4 pt-3 hidden">
     <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button class="subtab-btn">Calendar</button>
-      <button class="subtab-btn">Events</button>
-      <button class="subtab-btn active">OOTDs</button>
+      <button onclick="switchSubTab('planner', 'calendar')" id="p-sub-calendar" class="subtab-btn">Calendar</button>
+      <button onclick="switchSubTab('planner', 'events')" id="p-sub-events" class="subtab-btn">Events</button>
+      <button onclick="switchSubTab('planner', 'ootds')" id="p-sub-ootds" class="subtab-btn active">OOTDs</button>
     </div>
 
-    <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 flex justify-between items-center mb-4">
-      <div>
-        <p class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Kottiyoor</p>
-        <p class="text-xl font-bold text-black">28°C</p>
-      </div>
-      <div class="text-right">
-        <p class="text-[10px] font-semibold text-zinc-500">Weekly Forecast</p>
-        <p class="text-xs text-zinc-400">Warm & Sunny</p>
-      </div>
+    <div id="planner-sec-calendar" class="hidden text-center py-8 text-xs text-zinc-400">
+      Calendar View Syncing...
     </div>
 
-    <div class="space-y-3">
-      <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider">My OOTDs</h3>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
-          <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+    <div id="planner-sec-events" class="hidden text-center py-8 text-xs text-zinc-400">
+      No upcoming events scheduled.
+    </div>
+
+    <div id="planner-sec-ootds" class="space-y-4">
+      <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3.5 flex justify-between items-center">
+        <div>
+          <p class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Kottiyoor</p>
+          <p class="text-xl font-bold text-black">28°C</p>
         </div>
-        <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
-          <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
-          <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+        <div class="text-right">
+          <p class="text-[10px] font-semibold text-zinc-500">Weekly Forecast</p>
+          <p class="text-xs text-zinc-400">Warm & Sunny</p>
         </div>
       </div>
 
-      <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider pt-2">OOTD Recommendation</h3>
-      <div class="bg-black text-white rounded-2xl p-4 space-y-1">
-        <p class="text-xs font-bold text-zinc-100">Smart Casual Blend</p>
-        <p class="text-[11px] text-zinc-400 leading-relaxed">Pair navy trousers with classic white sneakers for an effortless day vibe.</p>
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider">My OOTDs</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
+            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+            <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+          </div>
+          <div class="border border-zinc-200 rounded-2xl p-2 bg-zinc-50 flex gap-2 justify-center">
+            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+            <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=150" class="w-12 h-12 object-contain bg-white rounded-lg p-1 border">
+          </div>
+        </div>
+
+        <h3 class="text-xs font-bold uppercase text-zinc-400 tracking-wider pt-2">OOTD Recommendation</h3>
+        <div class="bg-black text-white rounded-2xl p-4 space-y-1">
+          <p class="text-xs font-bold text-zinc-100">Smart Casual Blend</p>
+          <p class="text-[11px] text-zinc-400 leading-relaxed">Pair navy trousers with classic white sneakers for an effortless day vibe.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -197,63 +224,75 @@
   <!-- SCREEN 3: DISCOVER -->
   <div id="view-discover" class="screen-content px-4 pt-3 hidden">
     <div class="flex border-b border-zinc-100 mb-4 justify-around">
-      <button class="subtab-btn active">Feed</button>
-      <button class="subtab-btn">Explore</button>
-      <button class="subtab-btn">Shop</button>
+      <button onclick="switchSubTab('discover', 'feed')" id="d-sub-feed" class="subtab-btn active">Feed</button>
+      <button onclick="switchSubTab('discover', 'explore')" id="d-sub-explore" class="subtab-btn">Explore</button>
+      <button onclick="switchSubTab('discover', 'shop')" id="d-sub-shop" class="subtab-btn">Shop</button>
     </div>
 
-    <div class="border border-zinc-200 rounded-3xl p-3 bg-white space-y-3">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">J</div>
-        <div>
-          <p class="text-xs font-bold text-black">Jeniffer51</p>
-          <p class="text-[9px] text-zinc-400">2 hours ago</p>
+    <div id="discover-sec-feed" class="space-y-4">
+      <div class="border border-zinc-200 rounded-3xl p-3 bg-white space-y-3">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">J</div>
+          <div>
+            <p class="text-xs font-bold text-black">Jeniffer51</p>
+            <p class="text-[9px] text-zinc-400">2 hours ago</p>
+          </div>
         </div>
+        <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500" class="w-full h-56 object-cover rounded-2xl">
+        <p class="text-xs text-zinc-600 px-1">Minimalist beige aesthetics for soft light afternoon mood.</p>
       </div>
-      <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500" class="w-full h-56 object-cover rounded-2xl">
-      <p class="text-xs text-zinc-600 px-1">Minimalist beige aesthetics for soft light afternoon mood.</p>
+    </div>
+
+    <div id="discover-sec-explore" class="hidden text-center py-8 text-xs text-zinc-400">
+      Trending styles loading...
+    </div>
+
+    <div id="discover-sec-shop" class="hidden text-center py-8 text-xs text-zinc-400">
+      Curated shopping collection offline.
     </div>
   </div>
 
   <!-- SCREEN 4: VIRTUAL TRY-ON (Studio) -->
   <div id="view-tryon" class="screen-content px-4 pt-3 hidden space-y-4">
     <div class="flex border-b border-zinc-100 mb-2 justify-around">
-      <button class="subtab-btn active">Try-on</button>
-      <button class="subtab-btn">Canvas</button>
-      <button class="subtab-btn">Dressing</button>
+      <button onclick="switchSubTab('tryon', 'tryon')" id="t-sub-tryon" class="subtab-btn active">Try-on</button>
+      <button onclick="switchSubTab('tryon', 'canvas')" id="t-sub-canvas" class="subtab-btn">Canvas</button>
+      <button onclick="switchSubTab('tryon', 'dressing')" id="t-sub-dressing" class="subtab-btn">Dressing</button>
     </div>
 
-    <div class="space-y-3">
+    <div id="tryon-sec-tryon" class="space-y-3">
       <p class="text-xs font-semibold text-zinc-800">Choose clothing type and upload:</p>
       <div class="grid grid-cols-3 gap-2 text-center text-xs">
-        <button class="py-2 border border-black bg-black text-white rounded-xl font-medium">Tops</button>
-        <button class="py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">Bottoms</button>
-        <button class="py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">One-piece</button>
+        <button onclick="selectOption(this)" class="opt-btn py-2 border border-black bg-black text-white rounded-xl font-medium">Tops</button>
+        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">Bottoms</button>
+        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">One-piece</button>
       </div>
 
       <div class="flex justify-around py-5 border border-dashed border-zinc-300 rounded-2xl bg-zinc-50/50">
-        <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-14 h-14 object-contain mix-blend-multiply">
-        <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-14 h-14 object-contain mix-blend-multiply">
-        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-14 h-14 object-contain mix-blend-multiply">
+        <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
+        <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
+        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-14 h-14 object-contain mix-blend-multiply cursor-pointer hover:scale-105 transition-transform" onclick="alert('Item selected')">
       </div>
 
       <p class="text-xs font-semibold text-zinc-800 pt-2">Choose body type:</p>
       <div class="grid grid-cols-2 gap-2 text-center text-xs">
-        <button class="py-2 border border-zinc-300 bg-zinc-100 text-black font-semibold rounded-xl">Self</button>
-        <button class="py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl">Model</button>
+        <button onclick="selectOption(this)" class="opt-btn py-2 border border-black bg-black text-white rounded-xl font-medium">Self</button>
+        <button onclick="selectOption(this)" class="opt-btn py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 rounded-xl font-medium">Model</button>
       </div>
     </div>
+
+    <div id="tryon-sec-canvas" class="hidden text-center py-8 text-xs text-zinc-400">Studio canvas ready.</div>
+    <div id="tryon-sec-dressing" class="hidden text-center py-8 text-xs text-zinc-400">Dressing room ready.</div>
   </div>
 
   <!-- SCREEN 5: BESPOKELY AI STYLIST -->
   <div id="view-ai" class="screen-content px-4 pt-3 hidden space-y-4">
     <div class="flex border-b border-zinc-100 mb-2 justify-around">
-      <button onclick="switchAISub('stylist')" id="ai-sub-btn-stylist" class="subtab-btn active">Stylist</button>
-      <button onclick="switchAISub('designer')" id="ai-sub-btn-designer" class="subtab-btn">Designer</button>
-      <button onclick="switchAISub('ratings')" id="ai-sub-btn-ratings" class="subtab-btn">Outfit Ratings</button>
+      <button onclick="switchSubTab('ai', 'stylist')" id="a-sub-stylist" class="subtab-btn active">Stylist</button>
+      <button onclick="switchSubTab('ai', 'designer')" id="a-sub-designer" class="subtab-btn">Designer</button>
+      <button onclick="switchSubTab('ai', 'ratings')" id="a-sub-ratings" class="subtab-btn">Outfit Ratings</button>
     </div>
 
-    <!-- AI Stylist -->
     <div id="ai-sec-stylist" class="space-y-3">
       <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-800 border border-zinc-200/60 space-y-1">
         <p class="font-bold text-black">BeSpokely AI</p>
@@ -268,7 +307,6 @@
       </div>
     </div>
 
-    <!-- AI Designer -->
     <div id="ai-sec-designer" class="hidden space-y-3">
       <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-800 border border-zinc-200/60">
         <p class="font-bold text-black">Generate Trend Outfit</p>
@@ -279,7 +317,6 @@
       </div>
     </div>
 
-    <!-- AI Ratings -->
     <div id="ai-sec-ratings" class="hidden space-y-3">
       <div class="p-4 border border-zinc-200 rounded-2xl bg-white space-y-3">
         <div class="flex justify-between items-center">
@@ -298,78 +335,28 @@
   </div>
 
   <!-- FLOATING ACTION BUTTON -->
-  <button class="absolute bottom-20 right-5 w-12 h-12 bg-black text-white rounded-full shadow-2xl flex items-center justify-center z-30 active:scale-95 transition-transform">
+  <button onclick="toggleAddModal()" class="absolute bottom-20 right-5 w-12 h-12 bg-black text-white rounded-full shadow-2xl flex items-center justify-center z-30 active:scale-95 transition-transform">
     <i data-lucide="plus" class="w-6 h-6"></i>
   </button>
 
-  <!-- BOTTOM NAVIGATION (Fixed Bottom) -->
+  <!-- ADD ITEM MODAL -->
+  <div id="add-modal" class="hidden absolute inset-0 bg-black/40 z-40 flex items-end justify-center">
+    <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 animate-in slide-in-from-bottom">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-bold text-black">Add New Item</h3>
+        <button onclick="toggleAddModal()" class="text-xs text-zinc-400">Close</button>
+      </div>
+      <div class="space-y-2">
+        <button onclick="alert('Camera opened')" class="w-full py-3 bg-zinc-100 rounded-xl text-xs font-bold text-zinc-800 flex items-center justify-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4"></i> Take Photo
+        </button>
+        <button onclick="alert('Gallery opened')" class="w-full py-3 bg-zinc-100 rounded-xl text-xs font-bold text-zinc-800 flex items-center justify-center gap-2">
+          <i data-lucide="image" class="w-4 h-4"></i> Choose from Gallery
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
   <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-zinc-200 py-3 px-4 flex justify-around items-center z-30">
-    <button onclick="switchTab('closet', 'Closet')" id="nav-closet" class="flex flex-col items-center text-black">
-      <i data-lucide="shirt" class="w-5 h-5"></i>
-      <span class="text-[9px] font-semibold mt-0.5">Closet</span>
-    </button>
-    <button onclick="switchTab('planner', 'Planner')" id="nav-planner" class="flex flex-col items-center text-zinc-400">
-      <i data-lucide="calendar" class="w-5 h-5"></i>
-      <span class="text-[9px] font-semibold mt-0.5">Planner</span>
-    </button>
-    <button onclick="switchTab('discover', 'Discover')" id="nav-discover" class="flex flex-col items-center text-zinc-400">
-      <i data-lucide="compass" class="w-5 h-5"></i>
-      <span class="text-[9px] font-semibold mt-0.5">Discover</span>
-    </button>
-    <button onclick="switchTab('tryon', 'Studio')" id="nav-tryon" class="flex flex-col items-center text-zinc-400">
-      <i data-lucide="sparkles" class="w-5 h-5"></i>
-      <span class="text-[9px] font-semibold mt-0.5">Studio</span>
-    </button>
-    <button onclick="switchTab('ai', 'BeSpokely')" id="nav-ai" class="flex flex-col items-center text-zinc-400">
-      <i data-lucide="bot" class="w-5 h-5"></i>
-      <span class="text-[9px] font-semibold mt-0.5">BeSpokely</span>
-    </button>
-  </nav>
-
-</div>
-
-<script>
-  function switchTab(tabId, title) {
-    document.querySelectorAll('.screen-content').forEach(s => s.classList.add('hidden'));
-    document.getElementById(`view-${tabId}`).classList.remove('hidden');
-    document.getElementById('screen-title').textContent = title;
-
-    ['closet', 'planner', 'discover', 'tryon', 'ai'].forEach(n => {
-      const btn = document.getElementById(`nav-${n}`);
-      btn.className = n === tabId ? 'flex flex-col items-center text-black' : 'flex flex-col items-center text-zinc-400';
-    });
-  }
-
-  function switchClosetSub(sub) {
-    document.getElementById('c-items-content').classList.toggle('hidden', sub !== 'items');
-    document.getElementById('c-canvas-content').classList.toggle('hidden', sub !== 'canvas');
-    document.getElementById('c-collections-content').classList.toggle('hidden', sub !== 'collections');
-
-    document.getElementById('c-sub-items').className = sub === 'items' ? 'subtab-btn active' : 'subtab-btn';
-    document.getElementById('c-sub-canvas').className = sub === 'canvas' ? 'subtab-btn active' : 'subtab-btn';
-    document.getElementById('c-sub-collections').className = sub === 'collections' ? 'subtab-btn active' : 'subtab-btn';
-  }
-
-  function switchAISub(sub) {
-    document.getElementById('ai-sec-stylist').classList.toggle('hidden', sub !== 'stylist');
-    document.getElementById('ai-sec-designer').classList.toggle('hidden', sub !== 'designer');
-    document.getElementById('ai-sec-ratings').classList.toggle('hidden', sub !== 'ratings');
-
-    document.getElementById('ai-sub-btn-stylist').className = sub === 'stylist' ? 'subtab-btn active' : 'subtab-btn';
-    document.getElementById('ai-sub-btn-designer').className = sub === 'designer' ? 'subtab-btn active' : 'subtab-btn';
-    document.getElementById('ai-sub-btn-ratings').className = sub === 'ratings' ? 'subtab-btn active' : 'subtab-btn';
-  }
-
-  if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-    `;
-    navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], {type: 'text/javascript'}))).catch(()=>{});
-  }
-
-  lucide.createIcons();
-</script>
-</body>
-</html>
-
+    <button onclick="switchTab('closet', 'Closet')" id="nav-closet" c
