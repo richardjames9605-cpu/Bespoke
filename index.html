@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BeSpoke AI Stylist</title>
+
+  <!-- PWA & Mobile Installability Configs -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" id="pwa-manifest">
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    // Dynamically generate PWA manifest inside single file
+    const manifest = {
+      "name": "BeSpoke AI Stylist",
+      "short_name": "BeSpoke",
+      "start_url": "./",
+      "display": "standalone",
+      "background_color": "#ffffff",
+      "theme_color": "#ffffff",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/isometric-line/512/clothes.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.getElementById('pwa-manifest').setAttribute('href', manifestURL);
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8f9fa;
+      color: #111827;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .app-screen {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+      min-h: 100vh;
+      box-shadow: 0 0 25px rgba(0,0,0,0.05);
+      position: relative;
+      display: flex;
+      flex-col;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .btn-active { background-color: #000000; color: #ffffff !important; }
+    .subtab-active { border-bottom: 2px solid #000000; color: #000000; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-zinc-100 min-h-screen">
+
+<div class="app-screen min-h-screen pb-20 flex flex-col justify-between">
+
+  <!-- TOP APP HEADER -->
+  <header class="px-5 pt-4 pb-2 border-b border-zinc-100 flex justify-between items-center bg-white sticky top-0 z-30">
+    <h1 id="screen-title" class="text-xl font-bold tracking-tight text-black">Closet</h1>
+    <div class="flex items-center gap-3">
+      <button class="p-1.5 rounded-full hover:bg-zinc-100"><i data-lucide="search" class="w-5 h-5 text-zinc-700"></i></button>
+      <button class="p-1.5 rounded-full hover:bg-zinc-100"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-700"></i></button>
+      <div class="w-8 h-8 rounded-full bg-zinc-200 overflow-hidden border border-zinc-300 flex items-center justify-center text-xs font-bold">
+        <i data-lucide="user" class="w-4 h-4 text-zinc-600"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: CLOSET (Items & Canvas) -->
+  <section id="view-closet" class="view-section flex-1 px-4 pt-3">
+    <!-- Sub-navigation: Items | Canvas | Collections -->
+    <div class="flex border-b border-zinc-200 mb-4 text-xs text-zinc-400 font-medium justify-around">
+      <button onclick="switchClosetSubTab('items')" id="subtab-items" class="pb-2 subtab-active">Items</button>
+      <button onclick="switchClosetSubTab('canvas')" id="subtab-canvas" class="pb-2">Canvas</button>
+      <button onclick="switchClosetSubTab('collections')" id="subtab-collections" class="pb-2">Collections</button>
+    </div>
+
+    <!-- SUBTAB: CLOSET ITEMS -->
+    <div id="closet-sub-items" class="space-y-4">
+      <!-- Category Chips -->
+      <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-black text-white whitespace-nowrap">Sweatshirts & Hoodies</button>
+        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Jeans</button>
+        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 whitespace-nowrap">Blazers & Suits</button>
+      </div>
+
+      <!-- Items Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3 flex flex-col items-center justify-center relative">
+          <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300" class="h-28 object-contain mix-blend-multiply" alt="Tee">
+        </div>
+        <div class="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3 flex flex-col items-center justify-center relative">
+          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="h-28 object-contain mix-blend-multiply" alt="Sneaker">
+        </div>
+        <div class="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3 flex flex-col items-center justify-center relative">
+          <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300" class="h-28 object-contain mix-blend-multiply" alt="Jacket">
+        </div>
+        <div class="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3 flex flex-col items-center justify-center relative">
+          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=300" class="h-28 object-contain mix-blend-multiply" alt="Jeans">
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTAB: CANVAS -->
+    <div id="closet-sub-canvas" class="hidden space-y-4">
+      <div class="bg-zinc-50 border border-dashed border-zinc-300 rounded-3xl h-80 relative flex flex-col items-center justify-center p-4">
+        <!-- Floating Canvas Preview Items -->
+        <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300" class="w-24 h-24 object-contain absolute top-6 left-12 mix-blend-multiply" alt="Shirt">
+        <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300" class="w-24 h-32 object-contain absolute top-16 right-10 mix-blend-multiply" alt="Pants">
+        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300" class="w-20 h-20 object-contain absolute bottom-12 left-10 mix-blend-multiply" alt="Shoes">
+
+        <!-- Canvas Action Bar -->
+        <div class="absolute bottom-4 flex gap-2">
+          <button class="bg-black text-white px-8 py-2.5 rounded-full font-medium text-xs shadow-md">Create Outfit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: PLANNER / OOTD -->
+  <section id="view-planner" class="view-section hidden flex-1 px-4 pt-3">
+    <!-- Sub-navigation: Calendar | Events | OOTDs -->
+    <div class="flex border-b border-zinc-200 mb-4 text-xs text-zinc-400 font-medium justify-around">
+      <button class="pb-2">Calendar</button>
+      <button class="pb-2">Events</button>
+      <button class="pb-2 subtab-active">OOTDs</button>
+    </div>
+
+    <!-- Weather Card -->
+    <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-3 flex justify-between items-center mb-4">
+      <div>
+        <p class="text-[10px] uppercase font-bold text-zinc-400">Kottiyoor</p>
+        <p class="text-xl font-bold text-black">28°C</p>
+      </div>
+      <div class="text-right">
+        <p class="text-[10px] font-semibold text-zinc-500">Weekly Forecast</p>
+        <p class="text-xs text-zinc-400">Warm • Sunny</p>
+      </div>
+    </div>
+
+    <!-- My OOTDs -->
+    <div class="space-y-3">
+      <h3 class="text-xs font-bold uppercase text-zinc-400">My OOTDs</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border border-zinc-200 rounded-2xl p-2.5 bg-zinc-50/50 flex gap-2 items-center">
+          <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-12 h-12 object-contain rounded-lg bg-white p-1 border">
+          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-12 h-12 object-contain rounded-lg bg-white p-1 border">
+        </div>
+        <div class="border border-zinc-200 rounded-2xl p-2.5 bg-zinc-50/50 flex gap-2 items-center">
+          <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=150" class="w-12 h-12 object-contain rounded-lg bg-white p-1 border">
+          <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=150" class="w-12 h-12 object-contain rounded-lg bg-white p-1 border">
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <h3 class="text-xs font-bold uppercase text-zinc-400 pt-2">OOTD Recommendation</h3>
+      <div class="bg-zinc-900 text-white rounded-2xl p-4 space-y-2">
+        <p class="text-xs font-semibold text-zinc-300">Smart Casual Blend</p>
+        <p class="text-[11px] text-zinc-400">Pair navy trousers with white leather sneakers for effortless balance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: DISCOVER -->
+  <section id="view-discover" class="view-section hidden flex-1 px-4 pt-3">
+    <div class="flex border-b border-zinc-200 mb-4 text-xs text-zinc-400 font-medium justify-around">
+      <button class="pb-2 subtab-active">Feed</button>
+      <button class="pb-2">Explore</button>
+      <button class="pb-2">Shop</button>
+    </div>
+
+    <!-- Feed Card -->
+    <div class="border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-sm space-y-3 p-3">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-zinc-800 text-white text-[10px] font-bold flex items-center justify-center">J</div>
+        <div>
+          <p class="text-xs font-bold text-black">Jeniffer51</p>
+          <p class="text-[9px] text-zinc-400">2 hours ago</p>
+        </div>
+      </div>
+      <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500" class="w-full h-60 object-cover rounded-2xl" alt="Outfit feed">
+      <p class="text-xs text-zinc-600 px-1">Minimalist beige aesthetics for soft light afternoon aesthetics.</p>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: VIRTUAL TRY-ON (Studio) -->
+  <section id="view-tryon" class="view-section hidden flex-1 px-4 pt-3 space-y-4">
+    <div class="flex border-b border-zinc-200 mb-2 text-xs text-zinc-400 font-medium justify-around">
+      <button class="pb-2 subtab-active">Try-on</button>
+      <button class="pb-2">Canvas</button>
+      <button class="pb-2">Dressing</button>
+    </div>
+
+    <div class="space-y-3">
+      <p class="text-xs font-semibold text-zinc-700">Choose clothing type and upload:</p>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <button class="py-2 border border-zinc-300 rounded-xl font-medium bg-black text-white">Tops</button>
+        <button class="py-2 border border-zinc-200 rounded-xl font-medium bg-zinc-50 text-zinc-600">Bottoms</button>
+        <button class="py-2 border border-zinc-200 rounded-xl font-medium bg-zinc-50 text-zinc-600">One-piece</button>
+      </div>
+
+      <div class="flex justify-around py-4 border border-dashed border-zinc-300 rounded-2xl bg-zinc-50/50">
+        <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150" class="w-16 h-16 object-contain mix-blend-multiply">
+        <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-16 h-16 object-contain mix-blend-multiply">
+        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-16 h-16 object-contain mix-blend-multiply">
+      </div>
+
+      <p class="text-xs font-semibold text-zinc-700 pt-2">Choose clothing type and upload body photo:</p>
+      <div class="grid grid-cols-2 gap-2 text-center text-xs">
+        <button class="py-2 border border-zinc-300 rounded-xl font-medium bg-zinc-100 text-zinc-800">Self</button>
+        <button class="py-2 border border-zinc-200 rounded-xl font-medium bg-zinc-50 text-zinc-600">Model</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 5: BESPOKELY AI (Stylist / Designer / Ratings) -->
+  <section id="view-ai" class="view-section hidden flex-1 px-4 pt-3 space-y-4">
+    <!-- Subtabs: Stylist | Designer | Ratings -->
+    <div class="flex border-b border-zinc-200 mb-2 text-xs text-zinc-400 font-medium justify-around">
+      <button onclick="switchAISubTab('stylist')" id="subtab-ai-stylist" class="pb-2 subtab-active">Stylist</button>
+      <button onclick="switchAISubTab('designer')" id="subtab-ai-designer" class="pb-2">Designer</button>
+      <button onclick="switchAISubTab('ratings')" id="subtab-ai-ratings" class="pb-2">Outfit Ratings</button>
+    </div>
+
+    <!-- AI SUBTAB: STYLIST -->
+    <div id="ai-sub-stylist" class="space-y-4">
+      <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-700 space-y-2 border border-zinc-200">
+        <p class="font-bold text-black">BeSpokely AI:</p>
+        <p>"What do you pair with this navy blue t-shirt for a casual evening?"</p>
+      </div>
+      <div class="p-3 border border-zinc-200 rounded-2xl bg-white space-y-2">
+        <p class="text-xs font-medium text-zinc-600">Suggested Outfit Match:</p>
+        <div class="flex gap-2">
+          <img src="https://images.unsplash.com/photo-1542272604-780c36856842?w=150" class="w-14 h-14 object-contain mix-blend-multiply bg-zinc-50 rounded-lg">
+          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150" class="w-14 h-14 object-contain mix-blend-multiply bg-zinc-50 rounded-lg">
+        </div>
+      </div>
+    </div>
+
+    <!-- AI SUBTAB: DESIGNER -->
+    <div id="ai-sub-designer" class="hidden space-y-3">
+      <div class="bg-zinc-100 rounded-2xl p-3 text-xs text-zinc-700 border border-zinc-200">
+        <p class="font-bold text-black">Generate Trend Outfit:</p>
+        <p class="text-zinc-500 text-[11px]">Generating custom blazer suit cut...</p>
+      </div>
+      <div class="rounded-2xl overflow-hidden border border-zinc-200">
+        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400" class="w-full h-48 object-cover" alt="Designer Preview">
+      </div>
+    </div>
+
+    <!-- AI SUBTAB: OUTFIT RATINGS -->
+    <div id="ai-sub-ratings" class="hidden space-y-3">
+      <div class="p-4 border border-zinc-200 rounded-2xl bg-white space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-zinc-800">Overall Rating</span>
+          <span class="text-base font-bold text-black">7.8 / 10</span>
+        </div>
+        <div class="w-full bg-zinc-200 rounded-full h-2">
+          <div class="bg-black h-2 rounded-full" style="width: 78%"></div>
+        </div>
+
+        <div class="space-y-1.5 pt-2 text-[11px]">
+          <div class="flex justify-between"><span class="text-zinc-500">Color Harmony</span><span class="text-emerald-600 font-bold">Great Match</span></div>
+          <div class="flex justify-between"><span class="text-zinc-500">Occasion Fit</span><span class="text-emerald-600 font-bold">Optimal</span></div>
+          <div class="flex justify-between"><span class="text-zinc-500">Seasonal Vibe</span><span class="text-amber-600 font-bold">Moderate</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Prompt Input -->
+    <div class="relative pt-2">
+      <input type="text" placeholder="Ask BeSpokely..." class="w-full bg-zinc-100 border border-zinc-200 rounded-full py-3 px-4 pr-10 text-xs focus:outline-none focus:border-black">
+      <button class="absolute right-3 top-4 text-zinc-600"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></button>
+    </div>
+  </section>
+
+  <!-- FLOATING "+" BUTTON -->
+  <button class="fixed bottom-20 right-6 w-12 h-12 bg-black text-white rounded-full shadow-xl flex items-center justify-center z-40 active:scale-95 transition-transform">
+    <i data-lucide="plus" class="w-6 h-6"></i>
+  </button>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white border-t border-zinc-200 py-2.5 px-4 flex justify-between items-center z-50">
+    <button onclick="switchMainTab('closet', 'Closet')" id="nav-closet" class="flex flex-col items-center text-black">
+      <i data-lucide="shirt" class="w-5 h-5"></i>
+      <span class="text-[9px] font-medium mt-0.5">Closet</span>
+    </button>
+    <button onclick="switchMainTab('planner', 'Planner')" id="nav-planner" class="flex flex-col items-center text-zinc-400">
+      <i data-lucide="calendar" class="w-5 h-5"></i>
+      <span class="text-[9px] font-medium mt-0.5">Planner</span>
+    </button>
+    <button onclick="switchMainTab('discover', 'Discover')" id="nav-discover" class="flex flex-col items-center text-zinc-400">
+      <i data-lucide="compass" class="w-5 h-5"></i>
+      <span class="text-[9px] font-medium mt-0.5">Discover</span>
+    </button>
+    <button onclick="switchMainTab('tryon', 'Studio')" id="nav-tryon" class="flex flex-col items-center text-zinc-400">
+      <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <span class="text-[9px] font-medium mt-0.5">Studio</span>
+    </button>
+    <button onclick="switchMainTab('ai', 'BeSpokely')" id="nav-ai" class="flex flex-col items-center text-zinc-400">
+      <i data-lucide="bot" class="w-5 h-5"></i>
+      <span class="text-[9px] font-medium mt-0.5">BeSpokely</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+  function switchMainTab(tabId, title) {
+    document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+    document.getElementById(`view-${tabId}`).classList.remove('hidden');
+    document.getElementById('screen-title').textContent = title;
+
+    // Reset Nav Icon Colors
+    const navs = ['closet', 'planner', 'discover', 'tryon', 'ai'];
+    navs.forEach(n => {
+      const btn = document.getElementById(`nav-${n}`);
+      if (n === tabId) {
+        btn.className = 'flex flex-col items-center text-black';
+      } else {
+        btn.className = 'flex flex-col items-center text-zinc-400';
+      }
+    });
+  }
+
+  function switchClosetSubTab(sub) {
+    document.getElementById('closet-sub-items').classList.toggle('hidden', sub !== 'items');
+    document.getElementById('closet-sub-canvas').classList.toggle('hidden', sub !== 'canvas');
+
+    document.getElementById('subtab-items').className = sub === 'items' ? 'pb-2 subtab-active' : 'pb-2';
+    document.getElementById('subtab-canvas').className = sub === 'canvas' ? 'pb-2 subtab-active' : 'pb-2';
+    document.getElementById('subtab-collections').className = sub === 'collections' ? 'pb-2 subtab-active' : 'pb-2';
+  }
+
+  function switchAISubTab(sub) {
+    document.getElementById('ai-sub-stylist').classList.toggle('hidden', sub !== 'stylist');
+    document.getElementById('ai-sub-designer').classList.toggle('hidden', sub !== 'designer');
+    document.getElementById('ai-sub-ratings').classList.toggle('hidden', sub !== 'ratings');
+
+    document.getElementById('subtab-ai-stylist').className = sub === 'stylist' ? 'pb-2 subtab-active' : 'pb-2';
+    document.getElementById('subtab-ai-designer').className = sub === 'designer' ? 'pb-2 subtab-active' : 'pb-2';
+    document.getElementById('subtab-ai-ratings').className = sub === 'ratings' ? 'pb-2 subtab-active' : 'pb-2';
+  }
+
+  // Register service worker for installable PWA support
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+    `;
+    const blob = new Blob([swCode], {type: 'text/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }
+
+  lucide.createIcons();
+</script>
+</body>
+</html>
